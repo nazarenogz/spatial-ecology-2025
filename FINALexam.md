@@ -155,6 +155,8 @@ ggplot() +
 ```
 
 # Results
+These were all the plots produced by the functions, placed on a single 2x2 grid. 
+![Occurence and Density Plots](comparison_grid)
 
 
 
