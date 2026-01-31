@@ -155,8 +155,29 @@ ggplot() +
 ```
 
 # Results
+## The Plot Grid
 These were all the plots produced by the functions, placed on a single 2x2 grid. 
-![Occurence and Density Plots](comparison_grid)
+
+![Occurence and Density Plots](comparison_grid.png)
+
+### Interpretation
+blablaba
+
+## L-cross Plot
+
+![L-cross plot](lcross_plot.png)
+
+### Interpretation
+
+## Density Difference Map
+
+![Density diff](difference_map.png)
+
+### Interpretation
+
+## Spearman 
+
+
 
 
 
