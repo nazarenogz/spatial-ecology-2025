@@ -1,4 +1,4 @@
-# Predator-Pray Spatial Interaction Analysis: Wolf (*Canis lupus*) vs. Wild Boar (*Sus scrofa*) in Italy
+# Predator-Prey Spatial Interaction Analysis: Wolf (*Canis lupus*) vs. Wild Boar (*Sus scrofa*) in Italy
 
 This project explores the spatial relationship between wolves (predator) and wild boars (prey) across the Italian territory using GBIF occurrence data and Spatial Point Pattern Analysis.
 
@@ -6,7 +6,7 @@ This project explores the spatial relationship between wolves (predator) and wil
 Do high density areas for wolves coincide with high density areas for Boar? If so, At what distance ($r$) is the spatial attraction between the two species most significant?
 
 # Data and Methodology
-Data was downloaded using GBIF through the rgbif package. Domestic dogs and pigs where cleaned from the dataset to ensure data integrity. The Kernel Density estimation was performed using a sigma equal to 20km for botch species, because it represents a realistic movement range for these large mammals. For the coordinate system, all data was projected to EPSG:32632 (UTM 32N) to allow for accurate distance measurements in meters. A log-transformation was applied to the density surfaces to handle the high variance in occurrence intensity and highlight subtle spatial trends. The analysis was performed entirely in R.
+Data was downloaded using GBIF through the rgbif package. Domestic dogs and pigs were cleaned from the dataset to ensure data integrity. The Kernel Density estimation was performed using a sigma equal to 20km for both species, because it represents a realistic movement range for these large mammals. For the coordinate system, all data was projected to EPSG:32632 (UTM 32N) to allow for accurate distance measurements in meters. A log-transformation was applied to the density surfaces to handle the high variance in occurrence intensity and highlight subtle spatial trends. The analysis was performed entirely in R.
 
 ## Packages used
 Here are the packages used in the project. 
