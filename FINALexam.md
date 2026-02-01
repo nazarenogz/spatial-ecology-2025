@@ -138,7 +138,7 @@ plot(ck, . - r ~ r, main="Spatial Interaction: Wolf vs Boar")
 ```
 
 ### The Spearman Rank Correlation
-We perform a pixel-by-pixel correlation between the two KDE surfaces. Spearman was chosen due to it's non-parametric nature. It looks at the rank of the density rather than the raw values, making it much better at handling the "clumpy" nature of wildlife data and any remaining outliers. A value closer to +1 indicates that as Boar density increases, Wolf density increases predictably.
+We perform a pixel-by-pixel correlation between the two KDE surfaces. Spearman was chosen due to it's non-parametric nature. It looks at the rank of the density rather than the raw values, making it much better at handling the "clumpy" nature of wildlife data and any remaining outliers. A value closer to +1 indicates that as Boar density increases, Wolf density increases predictably. Inversly, values closer to -1 indicate the contrary. 0 means no correlation at all. 
 ```R
 spearman_rho <- cor(as.vector(wolf_dens_log$v), as.vector(boar_dens_log$v), 
                     method = "spearman", use = "complete.obs")
