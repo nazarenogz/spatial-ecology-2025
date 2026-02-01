@@ -23,7 +23,7 @@ Here are the packages used in the project.
 ## Study Area
 Before loading the data, we must define the study area. The `rnaturalearth` package was used to get Italy's borders and project them into UTM Zone 32N (EPSG:32632). This ensures that all distance-based calculations (like the 20km sigma) are measured accurately in meters rather than degrees. This is better due to degrees not being a consistent unit of measurement, and could influence the analysis later on. 
 
-Then the observation window was defined using the spatial data acquired. This will work as a container for the `ppp` later on.
+Then the observation window was defined using the spatial data acquired. This will work the container for the `ppp`.
 
 ```R
 italy <- ne_countries(country = "Italy", scale = "medium", returnclass = "sf") |>
