@@ -1,7 +1,6 @@
 library(rgbif)
 library(sf)
 library(spatstat)
-library(spatstat.explore)
 library(viridis)
 library(rnaturalearth)
 library(ggplot2)
@@ -105,4 +104,5 @@ ggplot() +
   geom_sf(data = italy, fill = NA, color = "white", linewidth = 0.1) +
   labs(title = "Spatial Dominance: Wolf vs Boar", 
        subtitle = "Brighter = Wolf dominance | Darker = Boar dominance") +
+
   theme_minimal() + theme(panel.grid = element_blank())
