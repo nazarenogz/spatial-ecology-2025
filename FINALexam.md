@@ -2,6 +2,8 @@
 
 This project explores the spatial relationship between wolves (predator) and wild boars (prey) across the Italian territory using GBIF occurrence data and Spatial Point Pattern Analysis.
 
+![WolfBoar](Lupo-e-Cinghiale.png)
+
 ## Research Question
 Do high density areas for wolves coincide with high density areas for Boar? If so, At what distance ($r$) is the spatial attraction between the two species most significant?
 
