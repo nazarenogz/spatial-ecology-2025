@@ -154,28 +154,54 @@ ggplot() +
   theme_minimal() + theme(panel.grid = element_blank())
 ```
 
-# Results
+# Results + Discussion
 ## The Plot Grid
 These were all the plots produced by the functions, placed on a single 2x2 grid. 
 
 ![Occurence and Density Plots](comparison_grid.png)
 
 ### Interpretation
-blablaba
+Both species show some spatial clustering rathere than uniform coverage in the territory, in the Western Alps for wolves and boars and also the eastern-most tip of Friuli-Venezia Giulia for Boars. This is probably not the real ecological distribution of these species and there is sampling bias, more records where people are and where there are more monitoring projects. 
+
+The Wolf shows high-density areas in the appennines and parts of the alps, with weaker but continuous density along the appennine. Wolves usually prefer low human density and good connectivity along its territory, which makes sense in this distribution. The Appennines acts as a long corridor along Itally, serving as a dispersal route for the species. 
+
+The Po Plain and the south, on the contrary, are low density. This could be explained with more human presence and activity, limiting the distribution. The Isalnds are completely empty. The KDE suggests range expansion with strong reliance on mountainous corridors.
+
+We could conclude that the Wolf's distribution looks like a recovering apex predator, that recently came back to the territory and whose distribution is more constrained by human pressure rather than climatic factors. 
+
+The Boar shows a more broader and continuous coverage in the North and along the Appennine corridor. This makes sense due to the species being more of a generalist, with high reproductive rate and tollerating more human presence. Boars, differently from wolves, can thrive in fragmented habitats and mixed agro-forest landscapes. 
+
+The Po Plain still shows some moderate density, unlike wolves. Boars could be exploiting crops and edge habitats in their favor. 
 
 ## L-cross Plot
+This is the L-cross function graph produced. 
 
 ![L-cross plot](lcross_plot.png)
 
 ### Interpretation
+The red dashed line represents complete spatial randomness, so there is no spatial correlation between predator and prey and they just land randomly. The black solid line is the observed data, showing how the actual distribution of wolves relates to distribution of boars. 
 
-## Density Difference Map
+The graph is split into two distinct phases based on distance (r): Between distances of 0 and 80km, the black line is above the red one. At these scales, wolves are found in close proximity to boars much more often than chance would predict. This confirms positive spatial coupling. Wolves are actively selecting territories within the "home ranges" of boar populations. It suggests that prey availability is a primary driver for where wolf packs establish themselves.
+
+The line then plummets around 80km. Here, the relationship shifts to spatial repulsion or simply a lack of correlation. This likely represents the "edge" of regional ecosystems or the geographic limits of the Apennine/Alpine ridges. It shows that the "wolf-boar link" is a localized phenomenon—once you move too far away from a specific prey hotspot, the predator density drops off because you've likely moved into a different habitat type (like an urbanized valley or a different mountain range).
+
+The L-cross function confirms a statistically significant spatial attraction between Canis lupus and Sus scrofa. The observed pattern (black line) remains consistently above the null model (red line) for distances up to 80km, peaking between 20-60km. This suggests that wolf presence is strongly anchored to prey-dense regions, providing quantitative support for the predator-prey tracking hypothesis.
+
+## Density Difference Map + Spearman 
 
 ![Density diff](difference_map.png)
 
 ### Interpretation
 
-## Spearman 
+The analysis yielded a Spearman’s rank correlation coefficient ($\rho$) of 0.62. This indicates a statistically significant, strong positive correlation between the two species' density surfaces. It is also evidence of a numerical response, the mechanism where a predator population increases in density in response to an increase in prey density. 
+
+The Density Difference Map reveals the fine-scale spatial balance between predator and prey. Brighter regions indicate areas of high relative Wolf establishment, particularly along the mountainous backbone of Italy. Conversely, darker regions highlight 'prey reservoirs'—high-density Boar areas that may represent future expansion fronts for the Wolf population. This spatial heterogeneity, combined with a positive Spearman correlation, illustrates a dynamic recolonization process where the predator follows the prey's footprint.
+
+# Conclusion
+
+Ultimately, the spatial analysis confirms that high density areas for both species coincide. The Spearman’s of 0.62 confirms that as Boar density increases, Wolf density follows a predictable upward trend. The spatial attraction between the two species is most significant at a distance of 20km to 60km. As shown by the L-cross function, this range represents the peak deviation from randomness, suggesting that the predator-prey link is strongest at the scale of regional pack territories and dispersal distances. The data proves that the Wolf’s recolonization of Italy is not a random expansion, but a statistically measurable "tracking" of its primary prey's footprint.
+
+
 
 
 
