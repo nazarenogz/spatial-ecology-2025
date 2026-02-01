@@ -12,16 +12,18 @@ Data was downloaded using GBIF through the rgbif package. Domestic dogs and pigs
 
 ## Packages used
 Here are the packages used in the project. 
-- `rgbif` allows R to access directly to the GBIF servers to download occurrence recorods
+- `rgbif` allows R to access directly to the GBIF servers to download occurrence recorods.
 - `sf` treats geographic data (points, polygons) like a data frame, making it easy to crop, project and transform coordinates.
 - `spatstat` was used for the Point Porcess objects (ppp) and calculating the KDE and L-cross interaction.
 - `rnaturalearth` provided italy's borders used as the window of the analysis.
 - `viridis` provided color scales designed to be read by everyone, including color blind people.
-- `ggplot2` was used to build the maps and charts
+- `ggplot2` was used to build the maps and charts.
 - `patchwork` was used to combine the obtained plots into a single image. 
 
-## First Steps
-Before loading the data, we must define the study area. The `rnaturalearth` package was used to get Italy's borders and project them into UTM Zone 32N (EPSG:32632). This ensures that all distance-based calculations (like the 20km sigma) are measured accurately in meters rather than degrees.
+## Study Area
+Before loading the data, we must define the study area. The `rnaturalearth` package was used to get Italy's borders and project them into UTM Zone 32N (EPSG:32632). This ensures that all distance-based calculations (like the 20km sigma) are measured accurately in meters rather than degrees. This is better due to degrees not being a consistent unit of measurement, and could influence the analysis later on. 
+
+Then the observation window was defined using the spatial data acquired. This will work as a container for the `ppp` later on.
 
 ```R
 italy <- ne_countries(country = "Italy", scale = "medium", returnclass = "sf") |>
