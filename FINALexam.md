@@ -14,7 +14,7 @@ Data was downloaded using GBIF through the rgbif package. Domestic dogs and pigs
 Here are the packages used in the project. 
 - `rgbif` allows R to access directly to the GBIF servers to download occurrence recorods
 - `sf` treats geographic data (points, polygons) like a data frame, making it easy to crop, project and transform coordinates.
-- `spatstat` and `spatstat.explore` were used for the Point Porcess objects (ppp) and calculating the KDE and L-cross interaction.
+- `spatstat` was used for the Point Porcess objects (ppp) and calculating the KDE and L-cross interaction.
 - `rnaturalearth` provided italy's borders used as the window of the analysis.
 - `viridis` provided color scales designed to be read by everyone, including color blind people.
 - `ggplot2` was used to build the maps and charts
