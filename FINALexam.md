@@ -68,6 +68,11 @@ wolf_dens <- density(wolf_ppp, sigma = 20000, dimyx = 512)
 boar_dens <- density(boar_ppp, sigma = 20000, dimyx = 512)
 ```
 Species occurrence data is often highly skewed, with a few areas having massive numbers of sightings while most have very few. To account for this and compare both datasets fairly, we created a custom function `apply_log_norm`, that performs a logarithmic transformation. This makes subtle patterns in lower-density areas more visible alongside high-density hotspots. This function also normalizes the data, scaling the values between 0 and 1. 
+
+The normalization performed is a Min-Max normalization, performed using the following formula:
+![Formula](normalization.png)
+With this method, every number in the resulting matrix is now ranging from 0.0 to 1.0. 
+
 ```R
 apply_log_norm <- function(dens_obj) {
   offset <- max(dens_obj$v, na.rm = TRUE) / 1000
