@@ -23,6 +23,7 @@ load_species_sf <- function(taxonKey, exclude_pattern = NULL) {
   #We filter to eliminate NA rows. 
   data <- data[!is.na(data$decimalLongitude) & !is.na(data$decimalLatitude), ]
   #The grep1 function with ! keeps the rows without the specified pattern, so we can filter for domestic animals. 
+  #ignore.case is true to ensure that the pattern ignores upper or lower cases. 
   if (!is.null(exclude_pattern)) {
     data <- data[!grepl(exclude_pattern, data$scientificName, ignore.case = TRUE), ]
   }
@@ -32,6 +33,7 @@ load_species_sf <- function(taxonKey, exclude_pattern = NULL) {
   sf_points <- st_as_sf(data, coords = c("decimalLongitude", "decimalLatitude"), crs = 4326) |>
     st_transform(32632)
   #Finally we just keep the points inside the Italy border with a logical vector. 
+  #Sparse is false to get back a logical vector. 
   return(sf_points[st_intersects(sf_points, italy, sparse = FALSE), ])
 }
 
@@ -53,6 +55,7 @@ boar_dens <- density(boar_ppp, sigma = 20000, dimyx = 512)
 #We create the Log-Normalization function for our densities, to visualize and compare them better in the plots.
 apply_log_norm <- function(dens_obj) {
   #We first create and add a small offset to add to every pixel, to avoid log(0) problem, so every pixel has a value.
+  #na.rm ignores any NA values. 
   offset <- max(dens_obj$v, na.rm = TRUE) / 1000
   dens_obj$v <- log(dens_obj$v + offset)
   #We apply a Min-Max scaling for the normalization. Now every value is contained between 1.0 and 0.0 for both density scales. 
@@ -78,7 +81,7 @@ plot_occ <- function(sf_points, species_label, color_p) {
 }
 #The second plotting function is used to plot the density estimations in Italy with a "heatmap". 
 plot_dens <- function(dens_obj, species_label, palette) {
-  #The density function creates an image, but we need a data table for ggplot2. 
+  #The density function creates an image, but we need a data table for ggplot2. We use the as.data.frame function to obtain it. 
   df <- as.data.frame(dens_obj)
   #We put names onto the columns. 
   colnames(df) <- c("x", "y", "value")
@@ -133,6 +136,7 @@ ggplot() +
   labs(title = "Spatial Dominance: Wolf vs Boar", 
        subtitle = "Brighter = Wolf dominance | Darker = Boar dominance") +
 theme_minimal() + theme(panel.grid = element_blank())
+
 
 
 
