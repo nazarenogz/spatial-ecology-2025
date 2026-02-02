@@ -61,6 +61,7 @@ load_species_sf <- function(taxonKey, exclude_pattern = NULL) {
 wolf_sf <- load_species_sf(5219173, "familiaris")
 boar_sf <- load_species_sf(7705930, "domestic|familiaris")
 ```
+One important thing to consider is that GBIF data may be subject to sampling bias. GBIF data represents where there was a human observation of the species, it does not represent its true habitat. Human observations have a bias towards roads, trails, urban edges or national parks, leaving other areas under-sampled. This has a fundemental effect on our estimations, and high density in this study does not necessarely mean high abundance. Density estimates should be interpreted as relative occurrence intensity, rather than true population density. 
 
 ## Kernel Density Estimation and Normalization
 To analyze the spatial relationship between species, we must move from discrete "points" to a continuous "intensity surface." This process allows us to identify hotspots and areas of low activity across the entire Italian landscape.
@@ -208,6 +209,8 @@ We could conclude that the Wolf's distribution looks like a recovering apex pred
 The Boar shows a more broader and continuous coverage in the North and along the Appennine corridor. This makes sense due to the species being more of a generalist, with high reproductive rate and tollerating more human presence. Boars, differently from wolves, can thrive in fragmented habitats and mixed agro-forest landscapes. 
 
 The Po Plain still shows some moderate density, unlike wolves. Boars could be exploiting crops and edge habitats in their favor. 
+
+An important possible problem to consider in this analysis is that densities near borders may be artificially lower, due to our window being just inside the Italian borders. This may be especially true for Boars near the Italy-Slovenia border, but also for wolves in the Northern Alps. There may be occurrences in the bordering countries that could increase the relative density in those areas, but for the purposes of this study we're deliberately not taking them into account.
 
 ## Density Difference Map + Spearman 
 
