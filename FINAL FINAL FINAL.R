@@ -50,45 +50,60 @@ wolf_dens <- density(wolf_ppp, sigma = 20000, dimyx = 512)
 boar_dens <- density(boar_ppp, sigma = 20000, dimyx = 512)
 
 # 5. Log-Normalization
+#We create the Log-Normalization function for our densities, to visualize and compare them better in the plots.
 apply_log_norm <- function(dens_obj) {
+  #We first create and add a small offset to add to every pixel, to avoid log(0) problem, so every pixel has a value.
   offset <- max(dens_obj$v, na.rm = TRUE) / 1000
   dens_obj$v <- log(dens_obj$v + offset)
+  #We apply a Min-Max scaling for the normalization. Now every value is contained between 1.0 and 0.0 for both density scales. 
   dens_obj$v <- (dens_obj$v - min(dens_obj$v, na.rm=T)) / 
     (max(dens_obj$v, na.rm=T) - min(dens_obj$v, na.rm=T))
   return(dens_obj)
 }
-
+#Apply the Log-Normalization to our densities. 
 wolf_dens_log <- apply_log_norm(wolf_dens)
 boar_dens_log <- apply_log_norm(boar_dens)
 
 # 6. Plotting Functions
+#The first plotting function is used to plot the occurrence points in Italy.
 plot_occ <- function(sf_points, species_label, color_p) {
   ggplot() +
+    #We first draw the Italy map to put the points into.
     geom_sf(data = italy, fill = "#f8f9fa", color = "grey80", linewidth = 0.2) +
+    #We draw the points, taking the data from our sf object created before.
     geom_sf(data = sf_points, color = color_p, size = 0.3, alpha = 0.4) +
     labs(title = paste("Occurrences:", species_label)) + 
-    theme_minimal() + theme(panel.grid = element_blank())
+    #We remove the default grey backgorund and grid lines of R, making the map look cleaner. 
+    theme_minimal() 
 }
-
+#The second plotting function is used to plot the density estimations in Italy with a "heatmap". 
 plot_dens <- function(dens_obj, species_label, palette) {
+  #The density function creates an image, but we need a data table for ggplot2. 
   df <- as.data.frame(dens_obj)
+  #We put names onto the columns. 
   colnames(df) <- c("x", "y", "value")
   
   ggplot() +
+    #We first draw the shape of italy, filled with a light grey, acting as a background, so areas with zero density still look like part of the country.
     geom_sf(data = italy, fill = "#eeeeee", color = NA) +
+    #We then draw our grid of pixels, the aes function tells R that the color of the pixel should be determined by the density number (0 to 1). Alpha is at 85% so you can still see the map.
     geom_raster(data = df, aes(x=x, y=y, fill=value), alpha = 0.85) +
+    #We set our viridis color palette
     scale_fill_viridis(option = palette, name = "Log Density") +
+    #We draw the italy border again, but this time with fill NA, just putting the outline on top of the heatmap so the borders look sharp. 
     geom_sf(data = italy, fill = NA, color = "white", linewidth = 0.1) +
     labs(title = paste("KDE:", species_label), subtitle = "Sigma: 20km") +
-    theme_minimal() + theme(panel.grid = element_blank())
+    #We remove the default grey backgorund and grid lines of R, making the map look cleaner. 
+    theme_minimal() 
 }
 
 # 7. Final Layout
+#We create all 4 plots
 p1 <- plot_occ(wolf_sf, "Wolf", "#35b779")
 p2 <- plot_dens(wolf_dens_log, "Wolf", "viridis")
 p3 <- plot_occ(boar_sf, "Boar", "#440154")
 p4 <- plot_dens(boar_dens_log, "Boar", "magma")
-
+#We join the created plots in one single image using patchwork. 
 (p1 + p2) / (p3 + p4)
 
 # 8. Statistical Analysis (L-cross and Spearman)
@@ -115,4 +130,5 @@ ggplot() +
        subtitle = "Brighter = Wolf dominance | Darker = Boar dominance") +
 
   theme_minimal() + theme(panel.grid = element_blank())
+
 
