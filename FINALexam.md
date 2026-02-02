@@ -26,32 +26,36 @@ Before loading the data, we must define the study area. The `rnaturalearth` pack
 Then the observation window was defined using the spatial data acquired. This will work the container for the `ppp`.
 
 ```R
+#We load the italian map and immediately transform it to a metric system, better for calculus. 
 italy <- ne_countries(country = "Italy", scale = "medium", returnclass = "sf") |>
   st_transform(32632)
+#We transform the map into the observation window used later for the ppp
 italy_poly <- as.owin(italy)
 ```
 ## Data Acquisition 
 We retrieve occurrence data from GBIF. To ensure data integrity, we filter out domestic variants (e.g., "familiaris" or "domestic") and remove duplicate coordinates that would otherwise cause artificial density "spikes."
 
 ```R
-load_species_sf <- function(taxon_key, exclude_pattern = NULL) {
-  data <- occ_search(taxonKey = taxon_key, country = "IT", hasCoordinate = TRUE, limit = 10000)$data
+#We create the function to download and clean the species data. 
+load_species_sf <- function(taxonKey, exclude_pattern = NULL) {
+#We trarnsform the downloaded data into a data table with $data, and filter for data that has coordinates and is in Italy.
+  data <- occ_search(taxonKey = taxonKey, country = "IT", hasCoordinate = TRUE, limit = 10000)$data
+#We eliminate useless columns and keep just these 3. 
   data <- data[, c("decimalLongitude", "decimalLatitude", "scientificName")]
+#We filter to eliminate NA rows. 
   data <- data[!is.na(data$decimalLongitude) & !is.na(data$decimalLatitude), ]
-  
+#The grep1 function with ! keeps the rows without the specified pattern, so we can filter for domestic animals. 
   if (!is.null(exclude_pattern)) {
     data <- data[!grepl(exclude_pattern, data$scientificName, ignore.case = TRUE), ]
   }
-  
+#We filter for duplicated data and just keep the first row to avoid problems with KDE. 
   data <- data[!duplicated(data[, c("decimalLongitude","decimalLatitude")]), ]
-  
+#We turn the data table into an sf object, and again transfor it to metric units. 
   sf_points <- st_as_sf(data, coords = c("decimalLongitude", "decimalLatitude"), crs = 4326) |>
     st_transform(32632)
-  
+#Finally we just keep the points inside the Italy border with a logical vector. 
   return(sf_points[st_intersects(sf_points, italy, sparse = FALSE), ])
-}
-
-# Fetching Data
+#We apply the function and download Boar and Wolf data, excluding dogs and pigs. 
 wolf_sf <- load_species_sf(5219173, "familiaris")
 boar_sf <- load_species_sf(7705930, "domestic|familiaris")
 ```
@@ -61,11 +65,14 @@ To analyze the spatial relationship between species, we must move from discrete 
 
 We convert the coordinate data into a Point Pattern Object. This is required by the `spatstat` package that links the occurrence points to our defined geographic window (Italy).
 ```R
+#We create our ppp objects necessary for the KDE. We extract X and Y coordinates in meters from the spatial object, 1 being the longitude and 2 the latitude.
+#Then, we also define the observation window created before, our italy polygon. We do this process for wolf and boar.
 wolf_ppp <- ppp(st_coordinates(wolf_sf)[,1], st_coordinates(wolf_sf)[,2], window = italy_poly)
 boar_ppp <- ppp(st_coordinates(boar_sf)[,1], st_coordinates(boar_sf)[,2], window = italy_poly)
 ```
 We then apply a KDE with a Sigma of 20km. This acts as a smoothing radius, also reflecting a realistic ecological scale for large mammals. `dimyx` is set to 51 to create a high resolution grid for the final maps. 
 ```R
+#With our ppp objects ready, we compute our density calculus. We use a common sigma of 20km for both species, with a 512x512 grid.
 wolf_dens <- density(wolf_ppp, sigma = 20000, dimyx = 512)
 boar_dens <- density(boar_ppp, sigma = 20000, dimyx = 512)
 ```
@@ -76,13 +83,17 @@ The normalization performed is a Min-Max normalization, performed using the foll
 With this method, every number in the resulting matrix is now ranging from 0.0 to 1.0. 
 
 ```R
+#We create the Log-Normalization function for our densities, to visualize and compare them better in the plots.
 apply_log_norm <- function(dens_obj) {
+  #We first create and add a small offset to add to every pixel, to avoid log(0) problem, so every pixel has a value.
   offset <- max(dens_obj$v, na.rm = TRUE) / 1000
   dens_obj$v <- log(dens_obj$v + offset)
+  #We apply a Min-Max scaling for the normalization. Now every value is contained between 1.0 and 0.0 for both density scales. 
   dens_obj$v <- (dens_obj$v - min(dens_obj$v, na.rm=T)) / 
     (max(dens_obj$v, na.rm=T) - min(dens_obj$v, na.rm=T))
-  return(dens_obj)}
-
+  return(dens_obj)
+}
+#Apply the Log-Normalization to our densities. 
 wolf_dens_log <- apply_log_norm(wolf_dens)
 boar_dens_log <- apply_log_norm(boar_dens)
 ```
@@ -95,9 +106,12 @@ The `plot_occ` function is used to plot the individual occurrence points, so raw
 ```R
 plot_occ <- function(sf_points, species_label, color_p) {
   ggplot() +
+    #We first draw the Italy map to put the points into.
     geom_sf(data = italy, fill = "#f8f9fa", color = "grey80", linewidth = 0.2) +
+    #We draw the points, taking the data from our sf object created before.
     geom_sf(data = sf_points, color = color_p, size = 0.3, alpha = 0.4) +
     labs(title = paste("Occurrences:", species_label)) + 
+    #We remove the default grey backgorund and grid lines of R, making the map look cleaner. 
     theme_minimal() + theme(panel.grid = element_blank())
 }
 ```
@@ -105,16 +119,24 @@ plot_occ <- function(sf_points, species_label, color_p) {
 The `plot_dens` function converts our mathematical KDE results into a visual heatmap. We convert the `spatstat` density object into a coordinate grid. `geom_raster` is used to draw the continuous color surface, covering the entire study area. High density areas are recognized thanks to the `scale_fill_viridis`. There are two `geom_sf` calls, the first is to draw the background and the second to draw a thin white border over the density colors, to clearly define the coastline of italy. 
 ```R
 plot_dens <- function(dens_obj, species_label, palette) {
+  #The density function creates an image, but we need a data table for ggplot2. 
   df <- as.data.frame(dens_obj)
+  #We put names onto the columns. 
   colnames(df) <- c("x", "y", "value")
   
   ggplot() +
+    #We first draw the shape of italy, filled with a light grey, acting as a background, so areas with zero density still look like part of the country.
     geom_sf(data = italy, fill = "#eeeeee", color = NA) +
+    #We then draw our grid of pixels, the aes function tells R that the color of the pixel should be determined by the density number (0 to 1). Alpha is at 85% so you can still see the map.
     geom_raster(data = df, aes(x=x, y=y, fill=value), alpha = 0.85) +
+    #We set our viridis color palette
     scale_fill_viridis(option = palette, name = "Log Density") +
+    #We draw the italy border again, but this time with fill NA, just putting the outline on top of the heatmap so the borders look sharp. 
     geom_sf(data = italy, fill = NA, color = "white", linewidth = 0.1) +
     labs(title = paste("KDE:", species_label), subtitle = "Sigma: 20km") +
-    theme_minimal() + theme(panel.grid = element_blank())}
+    #We remove the default grey backgorund and grid lines of R, making the map look cleaner. 
+    theme_minimal() theme(panel.grid = element_blank())
+}
 ```
 ## Final layout
 Finally, we use the `patchwork` package, so we can see the plots side by side, ready to be compared instantly. The plots were placed into a single 2x2 grid. 
@@ -132,19 +154,27 @@ Maps are useful for visual estimations of our data, but we need statistics to co
 ### The Spearman Rank Correlation
 We perform a pixel-by-pixel correlation between the two KDE surfaces. Spearman was chosen due to it's non-parametric nature. It looks at the rank of the density rather than the raw values, making it much better at handling the "clumpy" nature of wildlife data and any remaining outliers. A value closer to +1 indicates that as Boar density increases, Wolf density increases predictably. Inversly, values closer to -1 indicate the contrary. 0 means no correlation at all. 
 ```R
+#We compute our Spearman Analysis. We convert our density matrix into a single column vector, so each grid cell becomes a single observation. 
+#We use complete.obs to ignore NA values. 
+#We calculate the correlation coefficient between the two vectors with the Spearman method. 
 spearman_rho <- cor(as.vector(wolf_dens_log$v), as.vector(boar_dens_log$v), 
                     method = "spearman", use = "complete.obs")
+#We round our result to 4 decimal places, and then see the result. 
 print(paste("Spearman Correlation:", round(spearman_rho, 4)))
 ```
 
 ## The Density Difference Map
 This maps tries to analyze in which parts of Italy is the wolf more established relative to its prey, and vice versa. We treat the two normalized surfaces as layers in a "spatial calculator." By subtracting the Boar values from the Wolf values. Positive values (Brighter colors) area ssociated with areas where the wolf's relative intensity is higher than the boar's. Negative values (darker colors) are a reas where the Boar's intensity is higher than the Wolf's.
 ```R
+#We create the Density Difference Map, showing areas where the Boar or the Wolf dominate. 
+#We again turn the wolf density matrix into a data table, giving it specific names. 
 diff_df <- as.data.frame(wolf_dens_log)
 colnames(diff_df) <- c("x", "y", "wolf_val")
+#Since both the Wolf and Boar density maps were created using the exact same grid, we can simply "paste" the Boar density values as a new column in our table. They line up perfectly pixel-for-pixel.
 diff_df$boar_val <- as.data.frame(boar_dens_log)$value
+#Since both variables are normalized, here is where we calculate the density. With this order, positive values will mean higher olf density, and negative will mean higher boar density.
 diff_df$diff <- diff_df$wolf_val - diff_df$boar_val
-
+#We use the same logic used for the normal density maps, just changing the data used (The differences). 
 ggplot() +
   geom_sf(data = italy, fill = "grey95", color = NA) +
   geom_raster(data = diff_df, aes(x=x, y=y, fill=diff), alpha = 0.9) +
@@ -152,7 +182,7 @@ ggplot() +
   geom_sf(data = italy, fill = NA, color = "white", linewidth = 0.1) +
   labs(title = "Spatial Dominance: Wolf vs Boar", 
        subtitle = "Brighter = Wolf dominance | Darker = Boar dominance") +
-  theme_minimal() + theme(panel.grid = element_blank())
+theme_minimal() + theme(panel.grid = element_blank())
 ```
 
 # Results + Discussion
