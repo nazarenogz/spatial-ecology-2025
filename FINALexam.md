@@ -140,7 +140,7 @@ plot_dens <- function(dens_obj, species_label, palette) {
     geom_sf(data = italy, fill = NA, color = "white", linewidth = 0.1) +
     labs(title = paste("KDE:", species_label), subtitle = "Sigma: 20km") +
     #We remove the default grey backgorund and grid lines of R, making the map look cleaner. 
-    theme_minimal() theme(panel.grid = element_blank())
+    theme_minimal() + theme(panel.grid = element_blank())
 }
 ```
 ## Final layout
