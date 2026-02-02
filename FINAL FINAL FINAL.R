@@ -116,11 +116,15 @@ spearman_rho <- cor(as.vector(wolf_dens_log$v), as.vector(boar_dens_log$v),
 print(paste("Spearman Correlation:", round(spearman_rho, 4)))
 
 # 9. Density Difference Map
+#We create the Density Difference Map, showing areas where the Boar or the Wolf dominate. 
+#We again turn the wolf density matrix into a data table, giving it specific names. 
 diff_df <- as.data.frame(wolf_dens_log)
 colnames(diff_df) <- c("x", "y", "wolf_val")
+#Since both the Wolf and Boar density maps were created using the exact same grid, we can simply "paste" the Boar density values as a new column in our table. They line up perfectly pixel-for-pixel.
 diff_df$boar_val <- as.data.frame(boar_dens_log)$value
+#Since both variables are normalized, here is where we calculate the density. With this order, positive values will mean higher olf density, and negative will mean higher boar density.
 diff_df$diff <- diff_df$wolf_val - diff_df$boar_val
-
+#We use the same logic used for the normal density maps, just changing the data used (The differences). 
 ggplot() +
   geom_sf(data = italy, fill = "grey95", color = NA) +
   geom_raster(data = diff_df, aes(x=x, y=y, fill=diff), alpha = 0.9) +
@@ -128,8 +132,8 @@ ggplot() +
   geom_sf(data = italy, fill = NA, color = "white", linewidth = 0.1) +
   labs(title = "Spatial Dominance: Wolf vs Boar", 
        subtitle = "Brighter = Wolf dominance | Darker = Boar dominance") +
+theme_minimal() + theme(panel.grid = element_blank())
 
-  theme_minimal() + theme(panel.grid = element_blank())
 
 
 
