@@ -1,42 +1,51 @@
-library(rgbif)
-library(sf)
-library(spatstat)
-library(viridis)
-library(rnaturalearth)
-library(ggplot2)
-library(patchwork)
+library(rgbif) #Downloading raw GBIF data.
+library(sf) #To transform data frames into spatial objects, and other useful functions.
+library(spatstat) #To calculate KDE, Lcross and ppp. 
+library(viridis) #To use color-blind friendly color palettes in the plots. 
+library(rnaturalearth) #To load the Italy map.
+library(ggplot2) #To visualize the occurrence and density in Italy. 
+library(patchwork) #To snap separate plots into a single grid easily. 
 
 # 1. Spatial Setup
+#We load the italian map and immediately transform it to a metric system, better for calculus. 
 italy <- ne_countries(country = "Italy", scale = "medium", returnclass = "sf") |>
   st_transform(32632)
+#We transform the map into the observation window used later for the ppp
 italy_poly <- as.owin(italy)
 
 # 2. Data Loading Function
+#We create the function to download and clean the species data. 
 load_species_sf <- function(taxonKey, exclude_pattern = NULL) {
+  #We trarnsform the downloaded data into a data table with $data, and filter for data that has coordinates and is in Italy.
   data <- occ_search(taxonKey = taxonKey, country = "IT", hasCoordinate = TRUE, limit = 10000)$data
+  #We eliminate useless columns and keep just these 3. 
   data <- data[, c("decimalLongitude", "decimalLatitude", "scientificName")]
+  #We filter to eliminate NA rows. 
   data <- data[!is.na(data$decimalLongitude) & !is.na(data$decimalLatitude), ]
-  
+  #The grep1 function with ! keeps the rows without the specified pattern, so we can filter for domestic animals. 
   if (!is.null(exclude_pattern)) {
     data <- data[!grepl(exclude_pattern, data$scientificName, ignore.case = TRUE), ]
   }
-  
+  #We filter for duplicated data and just keep the first row to avoid problems with KDE. 
   data <- data[!duplicated(data[, c("decimalLongitude","decimalLatitude")]), ]
-  
+  #We turn the data table into an sf object, and again transfor it to metric units. 
   sf_points <- st_as_sf(data, coords = c("decimalLongitude", "decimalLatitude"), crs = 4326) |>
     st_transform(32632)
-  
+  #Finally we just keep the points inside the Italy border with a logical vector. 
   return(sf_points[st_intersects(sf_points, italy, sparse = FALSE), ])
 }
 
 # 3. Data Acquisition
+#We apply the function and download Boar and Wolf data, excluding dogs and pigs. 
 wolf_sf <- load_species_sf(5219173, "familiaris")
 boar_sf <- load_species_sf(7705930, "domestic|familiaris")
 
 # 4. Density Calculation (Sigma: 20km)
+#We create our ppp objects necessary for the KDE. We extract X and Y coordinates in meters from the spatial object, 1 being the longitude and 2 the latitude.
+#Then, we also define the observation window created before, our italy polygon. We do this process for wolf and boar.
 wolf_ppp <- ppp(st_coordinates(wolf_sf)[,1], st_coordinates(wolf_sf)[,2], window = italy_poly)
 boar_ppp <- ppp(st_coordinates(boar_sf)[,1], st_coordinates(boar_sf)[,2], window = italy_poly)
-
+#With our ppp objects ready, we compute our density calculus. We use a common sigma of 20km for both species, with a 512x512 grid.
 wolf_dens <- density(wolf_ppp, sigma = 20000, dimyx = 512)
 boar_dens <- density(boar_ppp, sigma = 20000, dimyx = 512)
 
@@ -106,3 +115,4 @@ ggplot() +
        subtitle = "Brighter = Wolf dominance | Darker = Boar dominance") +
 
   theme_minimal() + theme(panel.grid = element_blank())
+
