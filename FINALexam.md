@@ -14,7 +14,7 @@ Data was downloaded using GBIF through the rgbif package. Domestic dogs and pigs
 Here are the packages used in the project. 
 - `rgbif` allows R to access directly to the GBIF servers to download occurrence recorods.
 - `sf` treats geographic data (points, polygons) like a data frame, making it easy to crop, project and transform coordinates.
-- `spatstat` was used for the Point Porcess objects (ppp) and calculating the KDE and L-cross interaction.
+- `spatstat` was used for the Point Porcess objects (ppp) and calculating the KDE.
 - `rnaturalearth` provided italy's borders used as the window of the analysis.
 - `viridis` provided color scales designed to be read by everyone, including color blind people.
 - `ggplot2` was used to build the maps and charts.
@@ -129,14 +129,6 @@ p4 <- plot_dens(boar_dens_log, "Boar", "magma")
 ## Statistical Analysis
 Maps are useful for visual estimations of our data, but we need statistics to confirm our observations. We use two different methods: one for the raw points and one for the density surfaces.
 
-### L-cross Function
-We "superimpose" the two species into a single multi-type point pattern. The L-cross function then measures the average number of Boars found within a distance $r$ of a Wolf. We then plot it as *L(r)-r* to make it easy to read. If the solid black line is above the red dashed line (the null model), it indicates spatial attraction.
-```R
-multi_ppp <- superimpose(wolf = wolf_ppp, boar = boar_ppp)
-ck <- Lcross(multi_ppp, "wolf", "boar", correction="border")
-plot(ck, . - r ~ r, main="Spatial Interaction: Wolf vs Boar")
-```
-
 ### The Spearman Rank Correlation
 We perform a pixel-by-pixel correlation between the two KDE surfaces. Spearman was chosen due to it's non-parametric nature. It looks at the rank of the density rather than the raw values, making it much better at handling the "clumpy" nature of wildlife data and any remaining outliers. A value closer to +1 indicates that as Boar density increases, Wolf density increases predictably. Inversly, values closer to -1 indicate the contrary. 0 means no correlation at all. 
 ```R
@@ -181,20 +173,6 @@ We could conclude that the Wolf's distribution looks like a recovering apex pred
 The Boar shows a more broader and continuous coverage in the North and along the Appennine corridor. This makes sense due to the species being more of a generalist, with high reproductive rate and tollerating more human presence. Boars, differently from wolves, can thrive in fragmented habitats and mixed agro-forest landscapes. 
 
 The Po Plain still shows some moderate density, unlike wolves. Boars could be exploiting crops and edge habitats in their favor. 
-
-## L-cross Plot
-This is the L-cross function graph produced. 
-
-![L-cross plot](lcross_plot.png)
-
-### Interpretation
-The red dashed line represents complete spatial randomness, so there is no spatial correlation between predator and prey and they just land randomly. The black solid line is the observed data, showing how the actual distribution of wolves relates to distribution of boars. 
-
-The graph is split into two distinct phases based on distance (r): Between distances of 0 and 80km, the black line is above the red one. At these scales, wolves are found in close proximity to boars much more often than chance would predict. This confirms positive spatial coupling. Wolves are actively selecting territories within the "home ranges" of boar populations. It suggests that prey availability is a primary driver for where wolf packs establish themselves.
-
-The line then plummets around 80km. Here, the relationship shifts to spatial repulsion or simply a lack of correlation. This likely represents the "edge" of regional ecosystems or the geographic limits of the Apennine/Alpine ridges. It shows that the "wolf-boar link" is a localized phenomenon—once you move too far away from a specific prey hotspot, the predator density drops off because you've likely moved into a different habitat type (like an urbanized valley or a different mountain range).
-
-The L-cross function confirms a statistically significant spatial attraction between Canis lupus and Sus scrofa. The observed pattern (black line) remains consistently above the null model (red line) for distances up to 80km, peaking between 20-60km. This suggests that wolf presence is strongly anchored to prey-dense regions, providing quantitative support for the predator-prey tracking hypothesis.
 
 ## Density Difference Map + Spearman 
 
