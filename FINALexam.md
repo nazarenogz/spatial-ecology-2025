@@ -80,6 +80,8 @@ Species occurrence data is often highly skewed, with a few areas having massive 
 
 The normalization performed is a Min-Max normalization, performed using the following formula:
 ![Formula](normalization.png)
+<small>*Figure 1: Formula for Min-Max scaling used in the Log-Normalization function* 
+
 With this method, every number in the resulting matrix is now ranging from 0.0 to 1.0. 
 
 ```R
@@ -190,6 +192,7 @@ theme_minimal() + theme(panel.grid = element_blank())
 These were all the plots produced by the functions, placed on a single 2x2 grid. 
 
 ![Occurence and Density Plots](comparison_grid.png)
+<small>*Figure 2: Occurrence (left) and Normalized Density (right) maps of both Wolf (Top) and Boar (Bottom) in Italy*
 
 ### Interpretation
 Both species show some spatial clustering rathere than uniform coverage in the territory, in the Western Alps for wolves and boars and also the eastern-most tip of Friuli-Venezia Giulia for Boars. This is probably not the real ecological distribution of these species and there is sampling bias, more records where people are and where there are more monitoring projects. 
@@ -207,6 +210,7 @@ The Po Plain still shows some moderate density, unlike wolves. Boars could be ex
 ## Density Difference Map + Spearman 
 
 ![Density diff](difference_map.png)
+<small>*Figure 3: Density Difference map of Wolf vs Boar in Iitaly*
 
 ### Interpretation
 
