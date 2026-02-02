@@ -5,10 +5,10 @@ This project explores the spatial relationship between wolves (predator) and wil
 ![WolfBoar](Lupo-e-Cinghiale.png)
 
 ## Research Question
-Do high density areas for wolves coincide with high density areas for Boar? If so, At what distance ($r$) is the spatial attraction between the two species most significant?
+Do high density areas for wolves coincide with high density areas for Boar? 
 
 # Data and Methodology
-Data was downloaded using GBIF through the rgbif package. Domestic dogs and pigs were cleaned from the dataset to ensure data integrity. The Kernel Density estimation was performed using a sigma equal to 20km for both species, because it represents a realistic movement range for these large mammals. For the coordinate system, all data was projected to EPSG:32632 (UTM 32N) to allow for accurate distance measurements in meters. A log-transformation was applied to the density surfaces to handle the high variance in occurrence intensity and highlight subtle spatial trends. The analysis was performed entirely in R.
+Data was downloaded using GBIF through the rgbif package. Domestic dogs and pigs were cleaned from the dataset to ensure data integrity. Both Occurrence data and Kernel Density estimations were obtained and projected onto the Italian map. The KDE was performed using a sigma equal to 20km for both species, because it represents a realistic movement range for these large mammals. For the coordinate system, all data was projected to EPSG:32632 (UTM 32N) to allow for accurate distance measurements in meters. A log-transformation was applied to the density surfaces to handle the high variance in occurrence intensity and highlight subtle spatial trends. Finally, a correlation with the Spearman method was computed on the density data to have a statistical basis for the study. The analysis was performed entirely in R.
 
 ## Packages used
 Here are the packages used in the project. 
@@ -23,7 +23,7 @@ Here are the packages used in the project.
 ## Study Area
 Before loading the data, we must define the study area. The `rnaturalearth` package was used to get Italy's borders and project them into UTM Zone 32N (EPSG:32632). This ensures that all distance-based calculations (like the 20km sigma) are measured accurately in meters rather than degrees. This is better due to degrees not being a consistent unit of measurement, and could influence the analysis later on. 
 
-Then the observation window was defined using the spatial data acquired. This will work the container for the `ppp`.
+Then the observation window was defined using the spatial data acquired. This will work as the container for the `ppp`.
 
 ```R
 #We load the italian map and immediately transform it to a metric system, better for calculus. 
@@ -32,8 +32,9 @@ italy <- ne_countries(country = "Italy", scale = "medium", returnclass = "sf") |
 #We transform the map into the observation window used later for the ppp
 italy_poly <- as.owin(italy)
 ```
+
 ## Data Acquisition 
-We retrieve occurrence data from GBIF. To ensure data integrity, we filter out domestic variants (e.g., "familiaris" or "domestic") and remove duplicate coordinates that would otherwise cause artificial density "spikes."
+We retrieve occurrence data from GBIF. To ensure data integrity, we filter out domestic variants (e.g., "familiaris" or "domestic") and remove duplicate coordinates that would otherwise cause artificial density "spikes." We also ensure that no NA values are present in our data, and that all our points intersect with the Italian border (no points outside our study area). 
 
 ```R
 #We create the function to download and clean the species data. 
@@ -55,6 +56,7 @@ load_species_sf <- function(taxonKey, exclude_pattern = NULL) {
     st_transform(32632)
 #Finally we just keep the points inside the Italy border with a logical vector. 
   return(sf_points[st_intersects(sf_points, italy, sparse = FALSE), ])
+
 #We apply the function and download Boar and Wolf data, excluding dogs and pigs. 
 wolf_sf <- load_species_sf(5219173, "familiaris")
 boar_sf <- load_species_sf(7705930, "domestic|familiaris")
@@ -70,7 +72,7 @@ We convert the coordinate data into a Point Pattern Object. This is required by 
 wolf_ppp <- ppp(st_coordinates(wolf_sf)[,1], st_coordinates(wolf_sf)[,2], window = italy_poly)
 boar_ppp <- ppp(st_coordinates(boar_sf)[,1], st_coordinates(boar_sf)[,2], window = italy_poly)
 ```
-We then apply a KDE with a Sigma of 20km. This acts as a smoothing radius, also reflecting a realistic ecological scale for large mammals. `dimyx` is set to 51 to create a high resolution grid for the final maps. 
+We then apply a KDE with a Sigma of 20km. This acts as a smoothing radius, reflecting a realistic ecological scale for large mammals. `dimyx` is set to 512 to create a high resolution grid for the final maps. 
 ```R
 #With our ppp objects ready, we compute our density calculus. We use a common sigma of 20km for both species, with a 512x512 grid.
 wolf_dens <- density(wolf_ppp, sigma = 20000, dimyx = 512)
@@ -154,7 +156,7 @@ p4 <- plot_dens(boar_dens_log, "Boar", "magma")
 Maps are useful for visual estimations of our data, but we need statistics to confirm our observations. We use two different methods: one for the raw points and one for the density surfaces.
 
 ### The Spearman Rank Correlation
-We perform a pixel-by-pixel correlation between the two KDE surfaces. Spearman was chosen due to it's non-parametric nature. It looks at the rank of the density rather than the raw values, making it much better at handling the "clumpy" nature of wildlife data and any remaining outliers. A value closer to +1 indicates that as Boar density increases, Wolf density increases predictably. Inversly, values closer to -1 indicate the contrary. 0 means no correlation at all. 
+We perform a pixel-by-pixel correlation between the two KDE surfaces. Spearman was chosen due to it's non-parametric nature. It looks at the rank of the density rather than the raw values, making it much better at handling the clumpy nature of wildlife data and any remaining outliers. A value closer to +1 indicates that as Boar density increases, Wolf density increases predictably. Inversly, values closer to -1 indicate the contrary. 0 means no correlation at all. 
 ```R
 #We compute our Spearman Analysis. We convert our density matrix into a single column vector, so each grid cell becomes a single observation. 
 #We use complete.obs to ignore NA values. 
