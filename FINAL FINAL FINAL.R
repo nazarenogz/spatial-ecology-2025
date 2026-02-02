@@ -74,7 +74,7 @@ plot_occ <- function(sf_points, species_label, color_p) {
     geom_sf(data = sf_points, color = color_p, size = 0.3, alpha = 0.4) +
     labs(title = paste("Occurrences:", species_label)) + 
     #We remove the default grey backgorund and grid lines of R, making the map look cleaner. 
-    theme_minimal() 
+    theme_minimal() + theme(panel.grid = element_blank())
 }
 #The second plotting function is used to plot the density estimations in Italy with a "heatmap". 
 plot_dens <- function(dens_obj, species_label, palette) {
@@ -94,7 +94,7 @@ plot_dens <- function(dens_obj, species_label, palette) {
     geom_sf(data = italy, fill = NA, color = "white", linewidth = 0.1) +
     labs(title = paste("KDE:", species_label), subtitle = "Sigma: 20km") +
     #We remove the default grey backgorund and grid lines of R, making the map look cleaner. 
-    theme_minimal() 
+    theme_minimal() theme(panel.grid = element_blank())
 }
 
 # 7. Final Layout
@@ -106,13 +106,13 @@ p4 <- plot_dens(boar_dens_log, "Boar", "magma")
 #We join the created plots in one single image using patchwork. 
 (p1 + p2) / (p3 + p4)
 
-# 8. Statistical Analysis (L-cross and Spearman)
-multi_ppp <- superimpose(wolf = wolf_ppp, boar = boar_ppp)
-ck <- Lcross(multi_ppp, "wolf", "boar", correction="border")
-plot(ck, . - r ~ r, main="Spatial Interaction: Wolf vs Boar")
-
+# 8. Statistical Analysis
+#We compute our Spearman Analysis. We convert our density matrix into a single column vector, so each grid cell becomes a single observation. 
+#We use complete.obs to ignore NA values. 
+#We calculate the correlation coefficient between the two vectors with the Spearman method. 
 spearman_rho <- cor(as.vector(wolf_dens_log$v), as.vector(boar_dens_log$v), 
                     method = "spearman", use = "complete.obs")
+#We round our result to 4 decimal places, and then see the result. 
 print(paste("Spearman Correlation:", round(spearman_rho, 4)))
 
 # 9. Density Difference Map
@@ -130,5 +130,6 @@ ggplot() +
        subtitle = "Brighter = Wolf dominance | Darker = Boar dominance") +
 
   theme_minimal() + theme(panel.grid = element_blank())
+
 
 
