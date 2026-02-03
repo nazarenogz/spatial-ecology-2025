@@ -12,6 +12,10 @@ italy <- ne_countries(country = "Italy", scale = "medium", returnclass = "sf") |
   st_transform(32632)
 #We transform the map into the observation window used later for the ppp
 italy_poly <- as.owin(italy)
+#Let's visualize the italy map without our data plugged in
+ggplot() +
+    geom_sf(data = italy, fill = "#f8f9fa", color = "grey80", linewidth = 0.2) + 
+theme_minimal() + theme(panel.grid = element_blank())
 
 # 2. Data Loading Function
 #We create the function to download and clean the species data. 
@@ -136,6 +140,7 @@ ggplot() +
   labs(title = "Spatial Dominance: Wolf vs Boar", 
        subtitle = "Brighter = Wolf dominance | Darker = Boar dominance") +
 theme_minimal() + theme(panel.grid = element_blank())
+
 
 
 
