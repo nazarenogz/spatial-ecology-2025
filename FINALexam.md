@@ -158,6 +158,8 @@ p3 <- plot_occ(boar_sf, "Boar", "#440154")
 p4 <- plot_dens(boar_dens_log, "Boar", "magma")
 (p1 + p2) / (p3 + p4)
 ```
+![Occurence and Density Plots](comparison_grid.png)
+<small>*Figure 2: Occurrence (left) and Normalized Density (right) maps of both Wolf (Top) and Boar (Bottom) in Italy*
 
 ## Statistical Analysis
 Maps are useful for visual estimations of our data, but we need statistics to confirm our observations. We use two different methods: one for the raw points and one for the density surfaces.
@@ -195,15 +197,11 @@ ggplot() +
        subtitle = "Brighter = Wolf dominance | Darker = Boar dominance") +
 theme_minimal() + theme(panel.grid = element_blank())
 ```
+![Density diff](difference_map.png)
+<small>*Figure 3: Density Difference map of Wolf vs Boar in Iitaly*
 
 # Results + Discussion
-## The Plot Grid
-These were all the plots produced by the functions, placed on a single 2x2 grid. 
 
-![Occurence and Density Plots](comparison_grid.png)
-<small>*Figure 2: Occurrence (left) and Normalized Density (right) maps of both Wolf (Top) and Boar (Bottom) in Italy*
-
-### Interpretation
 Both species show some spatial clustering rathere than uniform coverage in the territory, in the Western Alps for wolves and boars and also the eastern-most tip of Friuli-Venezia Giulia for Boars. This is probably not the real ecological distribution of these species and there is sampling bias, more records where people are and where there are more monitoring projects. 
 
 The Wolf shows high-density areas in the appennines and parts of the alps, with weaker but continuous density along the appennine. Wolves usually prefer low human density and good connectivity along its territory, which makes sense in this distribution. The Appennines acts as a long corridor along Itally, serving as a dispersal route for the species. 
@@ -219,11 +217,6 @@ The Po Plain still shows some moderate density, unlike wolves. Boars could be ex
 An important possible problem to consider in this analysis is that densities near borders may be artificially lower, due to our window being just inside the Italian borders. This may be especially true for Boars near the Italy-Slovenia border, but also for wolves in the Northern Alps. There may be occurrences in the bordering countries that could increase the relative density in those areas, but for the purposes of this study we're deliberately not taking them into account.
 
 ## Density Difference Map + Spearman 
-
-![Density diff](difference_map.png)
-<small>*Figure 3: Density Difference map of Wolf vs Boar in Iitaly*
-
-### Interpretation
 
 The analysis yielded a Spearman’s rank correlation coefficient ($\rho$) of 0.62. This indicates a statistically significant, strong positive correlation between the two species' density surfaces. It is also evidence of a numerical response, the mechanism where a predator population increases in density in response to an increase in prey density. However, because KDE-derived raster values are spatially autocorrelated, the correlation should be interpreted descriptively. Spearman assumes that observations are independent, but our pixels are not, so they are pseudo replicates of nearby space. Thus, the correlation magnitude is probably artificially inflated, our result can be taken as a pattern or a descriptive interpretation but not a real statistical inference. 
 
