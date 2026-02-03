@@ -8,7 +8,7 @@ This project explores the spatial relationship between wolves (predator) and wil
 Do high density areas for wolves coincide with high density areas for Boar? 
 
 # Data and Methodology
-Data was downloaded using GBIF through the rgbif package. Domestic dogs and pigs were cleaned from the dataset to ensure data integrity. Both Occurrence data and Kernel Density estimations were obtained and projected onto the Italian map. The KDE was performed using a sigma equal to 20km for both species, because it represents a realistic movement range for these large mammals. For the coordinate system, all data was projected to EPSG:32632 (UTM 32N) to allow for accurate distance measurements in meters. A log-transformation was applied to the density surfaces to handle the high variance in occurrence intensity and highlight subtle spatial trends. Finally, a correlation with the Spearman method was computed on the density data to have a statistical basis for the study. The analysis was performed entirely in R.
+Data was downloaded using GBIF through the rgbif package. Domestic dogs and pigs were cleaned from the dataset to ensure data integrity. Both Occurrence data and Kernel Density estimations were obtained and projected onto the Italian map. The KDE was performed using a sigma equal to 20km for both species, because it represents a realistic movement range for these large mammals. For the coordinate system, all data was projected to EPSG:32632 (UTM 32N) to allow for accurate distance measurements in meters. A log-transformation was applied to the density surfaces to handle the high variance in occurrence intensity and highlight subtle spatial trends. Finally, a correlation with the Spearman method was computed on the density data to have a descritptive statistical basis for the study. The analysis was performed entirely in R.
 
 ## Packages used
 Here are the packages used in the project. 
@@ -164,8 +164,8 @@ We perform a pixel-by-pixel correlation between the two KDE surfaces. Spearman w
 #We calculate the correlation coefficient between the two vectors with the Spearman method. 
 spearman_rho <- cor(as.vector(wolf_dens_log$v), as.vector(boar_dens_log$v), 
                     method = "spearman", use = "complete.obs")
-#We round our result to 4 decimal places, and then see the result. 
-print(paste("Spearman Correlation:", round(spearman_rho, 4)))
+#We round our result to 2 decimal places, and then see the result. 
+print(paste("Spearman Correlation:", round(spearman_rho, 2)))
 ```
 
 ## The Density Difference Map
@@ -219,14 +219,15 @@ An important possible problem to consider in this analysis is that densities nea
 
 ### Interpretation
 
-The analysis yielded a Spearman’s rank correlation coefficient ($\rho$) of 0.62. This indicates a statistically significant, strong positive correlation between the two species' density surfaces. It is also evidence of a numerical response, the mechanism where a predator population increases in density in response to an increase in prey density. 
+The analysis yielded a Spearman’s rank correlation coefficient ($\rho$) of 0.62. This indicates a statistically significant, strong positive correlation between the two species' density surfaces. It is also evidence of a numerical response, the mechanism where a predator population increases in density in response to an increase in prey density. However, because KDE-derived raster values are spatially autocorrelated, the correlation should be interpreted descriptively. Spearman assumes that observations are independent, but our pixels are not, so they are pseudo replicates of nearby space. Thus, the correlation magnitude is probably artificially inflated, our result can be taken as a pattern or a descriptive interpretation but not a real statistical inference. 
 
-The Density Difference Map reveals the fine-scale spatial balance between predator and prey. Brighter regions indicate areas of high relative Wolf establishment, particularly along the mountainous backbone of Italy. Conversely, darker regions highlight 'prey reservoirs'—high-density Boar areas that may represent future expansion fronts for the Wolf population. This spatial heterogeneity, combined with a positive Spearman correlation, illustrates a dynamic recolonization process where the predator follows the prey's footprint.
+The Density Difference Map is another useful visual tool to see the dynamic relationship between predator and prey's distribution. Brighter colors indicate Wolf dominance, while darker colors Boar dominance. We can see a few boar dark hotspots, especially in the Mid Alps and the Friuli-Venezia Giulia region, bordering with Slovenia. Of course, boars also dominate the islands since they were not colonized yet by the wolf due to geographical barriers. Howver, in general in Northern Italy we see mostly positive values, indicating wolf-favoured landscapes. 
+
+In the Appenines the story is different, we see that values tend to be neutral or slightly positive, indicating coexistence between two species and no clear dominance from one. In Southern Italy we see more negative values, indicating more boar presence without wolves.
 
 # Conclusion
 
-Ultimately, the spatial analysis confirms that high density areas for both species coincide. The Spearman’s of 0.62 confirms that as Boar density increases, Wolf density follows a predictable upward trend. The spatial attraction between the two species is most significant at a distance of 20km to 60km. As shown by the L-cross function, this range represents the peak deviation from randomness, suggesting that the predator-prey link is strongest at the scale of regional pack territories and dispersal distances. The data proves that the Wolf’s recolonization of Italy is not a random expansion, but a statistically measurable "tracking" of its primary prey's footprint.
-
+We can conclude, thanks to our Spearman correlation, that there is a moderate-to-strong correlation between high wolf density areas and high boar density areas. We can visualize clearly this pattern in our KDE maps, where except for a few spots species tend to coexist. The purpose of this study is mainly descriptive and indicative, no real inference can be stated using biased GBIF occurrence data. 
 
 
 
