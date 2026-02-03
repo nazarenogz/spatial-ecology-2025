@@ -34,7 +34,14 @@ italy <- ne_countries(country = "Italy", scale = "medium", returnclass = "sf") |
   st_transform(32632)
 #We transform the map into the observation window used later for the ppp
 italy_poly <- as.owin(italy)
+#Let's visualize the italy map without our data plugged in
+ggplot() +
+    geom_sf(data = italy, fill = "#f8f9fa", color = "grey80", linewidth = 0.2) + 
+theme_minimal() + theme(panel.grid = element_blank())
 ```
+![italymap](italy_map.png)
+<small>*Figure 1: Map of Italy without data*
+
 
 ## Data Acquisition 
 We retrieve occurrence data from GBIF. To ensure data integrity, we filter out domestic variants (e.g., "familiaris" or "domestic") and remove duplicate coordinates that would otherwise cause artificial density "spikes." We also ensure that no NA values are present in our data, and that all our points intersect with the Italian border (no points outside our study area). 
@@ -88,7 +95,7 @@ Species occurrence data is often highly skewed, with a few areas having massive 
 
 The normalization performed is a Min-Max normalization, performed using the following formula:
 ![Formula](normalization.png)
-<small>*Figure 1: Formula for Min-Max scaling used in the Log-Normalization function* 
+<small>*Figure 2: Formula for Min-Max scaling used in the Log-Normalization function* 
 
 With this method, every number in the resulting matrix is now ranging from 0.0 to 1.0. 
 
@@ -159,7 +166,7 @@ p4 <- plot_dens(boar_dens_log, "Boar", "magma")
 (p1 + p2) / (p3 + p4)
 ```
 ![Occurence and Density Plots](comparison_grid.png)
-<small>*Figure 2: Occurrence (left) and Normalized Density (right) maps of both Wolf (Top) and Boar (Bottom) in Italy*
+<small>*Figure 3: Occurrence (left) and Normalized Density (right) maps of both Wolf (Top) and Boar (Bottom) in Italy*
 
 ## Statistical Analysis
 Maps are useful for visual estimations of our data, but we need statistics to confirm our observations. We use two different methods: one for the raw points and one for the density surfaces.
@@ -198,7 +205,7 @@ ggplot() +
 theme_minimal() + theme(panel.grid = element_blank())
 ```
 ![Density diff](difference_map.png)
-<small>*Figure 3: Density Difference map of Wolf vs Boar in Iitaly*
+<small>*Figure 4: Density Difference map of Wolf vs Boar in Iitaly*
 
 # Results + Discussion
 
