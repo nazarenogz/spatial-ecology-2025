@@ -115,8 +115,8 @@ p4 <- plot_dens(boar_dens_log, "Boar", "magma")
 #We calculate the correlation coefficient between the two vectors with the Spearman method. 
 spearman_rho <- cor(as.vector(wolf_dens_log$v), as.vector(boar_dens_log$v), 
                     method = "spearman", use = "complete.obs")
-#We round our result to 4 decimal places, and then see the result. 
-print(paste("Spearman Correlation:", round(spearman_rho, 4)))
+#We round our result to 2 decimal places, and then see the result. 
+print(paste("Spearman Correlation:", round(spearman_rho, 2)))
 
 # 9. Density Difference Map
 #We create the Density Difference Map, showing areas where the Boar or the Wolf dominate. 
@@ -136,6 +136,7 @@ ggplot() +
   labs(title = "Spatial Dominance: Wolf vs Boar", 
        subtitle = "Brighter = Wolf dominance | Darker = Boar dominance") +
 theme_minimal() + theme(panel.grid = element_blank())
+
 
 
 
