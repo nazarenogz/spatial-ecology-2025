@@ -42,24 +42,26 @@ We retrieve occurrence data from GBIF. To ensure data integrity, we filter out d
 ```R
 #We create the function to download and clean the species data. 
 load_species_sf <- function(taxonKey, exclude_pattern = NULL) {
-#We trarnsform the downloaded data into a data table with $data, and filter for data that has coordinates and is in Italy.
+  #We trarnsform the downloaded data into a data table with $data, and filter for data that has coordinates and is in Italy.
   data <- occ_search(taxonKey = taxonKey, country = "IT", hasCoordinate = TRUE, limit = 10000)$data
-#We eliminate useless columns and keep just these 3. 
+  #We eliminate useless columns and keep just these 3. 
   data <- data[, c("decimalLongitude", "decimalLatitude", "scientificName")]
-#We filter to eliminate NA rows. 
+  #We filter to eliminate NA rows. 
   data <- data[!is.na(data$decimalLongitude) & !is.na(data$decimalLatitude), ]
-#The grep1 function with ! keeps the rows without the specified pattern, so we can filter for domestic animals. 
+  #The grep1 function with ! keeps the rows without the specified pattern, so we can filter for domestic animals. 
+  #ignore.case is true to ensure that the pattern ignores upper or lower cases. 
   if (!is.null(exclude_pattern)) {
     data <- data[!grepl(exclude_pattern, data$scientificName, ignore.case = TRUE), ]
   }
-#We filter for duplicated data and just keep the first row to avoid problems with KDE. 
+  #We filter for duplicated data and just keep the first row to avoid problems with KDE. 
   data <- data[!duplicated(data[, c("decimalLongitude","decimalLatitude")]), ]
-#We turn the data table into an sf object, and again transfor it to metric units. 
+  #We turn the data table into an sf object, and again transfor it to metric units. 
   sf_points <- st_as_sf(data, coords = c("decimalLongitude", "decimalLatitude"), crs = 4326) |>
     st_transform(32632)
-#Finally we just keep the points inside the Italy border with a logical vector. 
+  #Finally we just keep the points inside the Italy border with a logical vector. 
+  #Sparse is false to get back a logical vector. 
   return(sf_points[st_intersects(sf_points, italy, sparse = FALSE), ])
-
+}
 #We apply the function and download Boar and Wolf data, excluding dogs and pigs. 
 wolf_sf <- load_species_sf(5219173, "familiaris")
 boar_sf <- load_species_sf(7705930, "domestic|familiaris")
@@ -94,6 +96,7 @@ With this method, every number in the resulting matrix is now ranging from 0.0 t
 #We create the Log-Normalization function for our densities, to visualize and compare them better in the plots.
 apply_log_norm <- function(dens_obj) {
   #We first create and add a small offset to add to every pixel, to avoid log(0) problem, so every pixel has a value.
+  #na.rm ignores any NA values. 
   offset <- max(dens_obj$v, na.rm = TRUE) / 1000
   dens_obj$v <- log(dens_obj$v + offset)
   #We apply a Min-Max scaling for the normalization. Now every value is contained between 1.0 and 0.0 for both density scales. 
